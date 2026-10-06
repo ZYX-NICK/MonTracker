@@ -151,10 +151,52 @@ def _today():
     return datetime.now(_CN_TZ).strftime("%Y-%m-%d")
 
 
-def fetch_one(code, type_, market=""):
+def fetch_crypto(code, api_key):
+    """抓取加密货币价格与历史（CryptoCompare，国内可达）。
+
+    code 如 'BTC' 或 'BTC-USDT'；价格与历史统一换算成人民币（CNY）。
+    返回额外带 fx（CNY/USD 汇率），用于把 USDT 成本换算成 CNY。
+    """
+    fsym = str(code).split("-")[0].upper()
+    if not api_key:
+        raise RuntimeError("缺少 CryptoCompare API Key（config.yaml 的 crypto.api_key）")
+    p = _get("https://min-api.cryptocompare.com/data/price",
+             params={"fsym": fsym, "tsyms": "USD,CNY", "api_key": api_key}).json()
+    if "CNY" not in p or "USD" not in p:
+        raise RuntimeError(f"CryptoCompare 返回异常：{p}")
+    price_cny = float(p["CNY"])
+    price_usd = float(p["USD"])
+    fx = price_cny / price_usd if price_usd else 7.2
+    hist = _get("https://min-api.cryptocompare.com/data/v2/histoday",
+                params={"fsym": fsym, "tsym": "CNY", "limit": "250",
+                        "api_key": api_key}).json()
+    history = []
+    for d in ((hist.get("Data") or {}).get("Data") or []):
+        ts, close = d.get("time"), d.get("close")
+        if ts and close:
+            date = datetime.fromtimestamp(int(ts), _CN_TZ).strftime("%Y-%m-%d")
+            history.append((date, float(close)))
+    daily_pct = 0.0
+    if len(history) >= 2 and history[-2][1]:
+        daily_pct = (history[-1][1] / history[-2][1] - 1.0) * 100.0
+    return {
+        "code": code,
+        "name": fsym,
+        "type": "crypto",
+        "price": price_cny,                                        # 现价（人民币）
+        "date": history[-1][0] if history else datetime.now(_CN_TZ).strftime("%Y-%m-%d"),
+        "daily_pct": daily_pct,                                    # 24 小时涨跌（%）
+        "fx": fx,                                                  # CNY/USD 汇率
+        "history": history,                                        # [(date, 收盘价CNY), ...] 升序
+    }
+
+
+def fetch_one(code, type_, market="", crypto_api_key=""):
     """按持仓类型分发抓取。"""
     if type_ == "fund":
         return fetch_fund(code)
+    if type_ == "crypto":
+        return fetch_crypto(code, crypto_api_key)
     return fetch_stock(code, market)
 
 

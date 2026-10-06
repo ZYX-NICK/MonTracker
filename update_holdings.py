@@ -55,12 +55,21 @@ def to_float(v):
         return None
 
 
+def _crypto_key():
+    """读取 config.yaml 里的 CryptoCompare Key（用于加密货币卖出时的行情查询）。"""
+    try:
+        with open(os.path.join(BASE, "config.yaml"), encoding="utf-8") as f:
+            return (yaml.safe_load(f).get("crypto") or {}).get("api_key", "")
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 def show(holdings):
     print("\n========== 当前持仓 ==========")
     if not holdings:
         print("  （空）")
     for i, h in enumerate(holdings, 1):
-        typ = "基金" if h["type"] == "fund" else "股票"
+        typ = {"fund": "基金", "stock": "股票", "crypto": "加密"}.get(h["type"], h["type"])
         flag = "（已清仓）" if h.get("closed") else ""
         print(f"  {i}. {h['name']}（{h['code']}）{typ}  份额 {h['shares']}  成本 {h['cost_price']}{flag}")
     print("==============================\n")
@@ -71,7 +80,7 @@ def add_manual(holdings):
     if not code:
         print("⚠ 代码不能为空，已取消。\n")
         return holdings
-    typ = (ask("类型 fund=基金 / stock=股票", "fund") or "").strip().lower()
+    typ = (ask("类型 fund=基金 / stock=股票 / crypto=加密", "fund") or "").strip().lower()
     shares = to_float(ask("份额/股数"))
     cost = to_float(ask("成本净值/成本价"))
     if shares is None or cost is None or shares <= 0 or cost <= 0:
@@ -171,7 +180,8 @@ def sell(holdings):
         return holdings
     h = holdings[int(idx) - 1]
     try:
-        d = fetch.fetch_one(str(h["code"]), h["type"], h.get("market", ""))
+        d = fetch.fetch_one(str(h["code"]), h["type"], h.get("market", ""),
+                            crypto_api_key=_crypto_key())
     except Exception as e:  # noqa: BLE001
         print(f"⚠ 未取到行情：{e}，已取消。\n")
         return holdings

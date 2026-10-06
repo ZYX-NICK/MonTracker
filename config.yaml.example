@@ -15,6 +15,11 @@ ai:
   base_url: "https://api.deepseek.com"
   model: "deepseek-chat"
 
+# ---------------- 加密货币（可选，需 CryptoCompare 免费 Key） ----------------
+# 到 https://min-api.cryptocompare.com 注册获取免费 Key，用于抓取币价（自动换算人民币）
+crypto:
+  api_key: ""
+
 # ---------------- 推送（可选，留空则跳过该渠道） ----------------
 push:
   # 微信 · PushPlus（推荐：HTML 排版）https://www.pushplus.plus 登录获取 token
