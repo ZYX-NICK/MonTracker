@@ -1,0 +1,25 @@
+# ===== 个人配置（含密钥 / 持仓，切勿提交）=====
+config.yaml
+holdings.yaml
+
+# ===== 生成的文件 =====
+output/
+logs/
+
+# ===== 本地运行脚本（由 setup_task.py 生成，含本机路径）=====
+run_daily.bat
+
+# ===== IDE =====
+.vscode/
+.idea/
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# ===== 系统 =====
+.DS_Store
+Thumbs.db

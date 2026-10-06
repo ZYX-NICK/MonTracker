@@ -1,0 +1,24 @@
+# ============================================================
+#  持仓清单（复制本文件为 holdings.yaml 并填写）
+#  快速开始： cp holdings.yaml.example holdings.yaml
+#  也可以运行 python update_holdings.py 交互式维护
+# ============================================================
+holdings:
+  # 场外基金示例（天天基金 / 东方财富的场外基金都适用）
+  - code: "110022"
+    type: fund
+    name: "易方达消费行业股票"   # 可留空 ""，自动联网获取
+    shares: 10000              # 持有份额
+    cost_price: 2.50           # 成本净值
+    trades:                    # 买卖记录（可选，用于图表标注买卖点）
+      - date: "2025-01-10"
+        action: buy            # buy=买入 / sell=卖出
+        amount: 20000          # 金额（元）
+
+  # 股票示例（沪市 market: sh，深市 market: sz）
+  - code: "600519"
+    type: stock
+    market: "sh"
+    name: "贵州茅台"
+    shares: 100               # 持股数
+    cost_price: 1500.00       # 成本价

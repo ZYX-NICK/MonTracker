@@ -1,0 +1,34 @@
+# ============================================================
+#  每日持仓分析 · 设置文件（复制本文件为 config.yaml 并填写）
+#  快速开始： cp config.yaml.example config.yaml
+# ============================================================
+
+# 报告输出目录（相对本文件所在目录，或填绝对路径）
+report_dir: output
+
+# ---------------- AI 研判（可选） ----------------
+# 想用大模型解读：到 https://platform.deepseek.com 注册获取 Key，填到 api_key。
+# 不填也能用（自动改用内置规则研判，免费、无需联网）。
+ai:
+  provider: "deepseek"          # deepseek / none
+  api_key: ""                   # 你的 DeepSeek API Key
+  base_url: "https://api.deepseek.com"
+  model: "deepseek-chat"
+
+# ---------------- 推送（可选，留空则跳过该渠道） ----------------
+push:
+  # 微信 · PushPlus（推荐：HTML 排版）https://www.pushplus.plus 登录获取 token
+  pushplus_token: ""
+  # 微信 · Server酱：https://sct.ftqq.com 登录获取 SendKey
+  wechat_sendkey: ""
+  # 钉钉群机器人 webhook（钉钉群 → 机器人 → 添加自定义机器人）
+  dingtalk_webhook: ""
+  dingtalk_secret: ""           # 机器人设了「加签」才需要
+  # 邮件（QQ 邮箱的 password 是「授权码」，不是登录密码）
+  email:
+    enabled: false
+    smtp_host: "smtp.qq.com"
+    smtp_port: 465
+    username: ""                # 发件邮箱
+    password: ""                # 授权码
+    to: ""                      # 收件邮箱，多个用英文逗号分隔
