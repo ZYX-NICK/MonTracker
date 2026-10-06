@@ -50,9 +50,7 @@ def main():
         type_ = h.get("type", "fund").strip().lower()
         market = str(h.get("market", "")).strip()
         try:
-            positions[code] = fetch.fetch_one(
-                code, type_, market,
-                crypto_api_key=(cfg.get("crypto") or {}).get("api_key", ""))
+            positions[code] = fetch.fetch_one(code, type_, market)
             print(f"  ✓ {positions[code]['name']}（{code}）")
         except Exception as e:  # noqa: BLE001
             positions[code] = None

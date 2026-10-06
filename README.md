@@ -15,7 +15,6 @@
 | 📊 风险指标 | 年化波动率、最大回撤、夏普比率、近 1 周 / 1 月 / 半年 / 1 年收益 |
 | 🏢 成分股分析 | 每只股票型基金前十大重仓股的当日涨跌，解释基金为何涨跌 |
 | 📰 今日要闻 | 东方财富 7x24 快讯 |
-| 🪙 加密货币 | 支持 OKX 持仓（BTC/ETH 等），CryptoCompare 数据源，自动换算人民币 |
 | 🤖 AI 研判 | 接入 DeepSeek 大模型，解读行业新闻、基金动态与成分股异动；不填 Key 自动改用内置规则 |
 | 📈 可视化报告 | 总市值走势、净值走势、仓位饼图、收益率柱状图，**买卖点标注**（红买绿卖） |
 | 📲 消息推送 | 微信（PushPlus HTML 版 / Server酱）、钉钉机器人、邮件 |
@@ -103,7 +102,7 @@ python main.py
 | 字段 | 说明 |
 |---|---|
 | `code` | 基金代码 / 股票代码 |
-| `type` | `fund` = 场外基金；`stock` = 股票；`crypto` = 加密货币 |
+| `type` | `fund` = 场外基金；`stock` = 股票 |
 | `name` | 名称，留空 `""` 自动联网获取 |
 | `market` | 仅股票需要：`sh`（沪市）/ `sz`（深市） |
 | `shares` | 基金持有份额，或股票持股数 |
@@ -121,25 +120,6 @@ trades:
 
 买卖点会以**红色「买」/ 绿色「卖」**标注在「近一年净值走势」和「组合总市值走势」两张图上。
 
-### 加密货币（OKX 持仓）
-
-想跟踪 OKX 上的币（BTC/ETH 等），在 `holdings.yaml` 里加 `type: crypto`：
-
-```yaml
-- code: "BTC-USDT"     # 币种，OKX 现货对
-  type: crypto
-  name: "比特币"        # 可留空，默认显示 BTC
-  shares: 0.05         # 持有数量
-  cost_price: 60000    # 成本价（USDT）
-```
-
-价格数据来自 **CryptoCompare**（国内服务器可访问），自动换算成人民币。需要免费 API Key：
-
-1. 到 https://min-api.cryptocompare.com 注册获取免费 Key
-2. 填入 `config.yaml` 的 `crypto.api_key`
-
-> 说明：OKX 等境外交易所 API 在国内服务器无法直连，故用 CryptoCompare 做数据源；持仓数量、成本由你手动填写，成本价按 USDT 填写、自动换算人民币。
-
 ### config.yaml —— 设置
 
 | 字段 | 说明 |
@@ -147,7 +127,6 @@ trades:
 | `report_dir` | 报告输出目录（相对路径或绝对路径） |
 | `ai.provider` | `deepseek`（大模型）/ `none`（关闭，用规则） |
 | `ai.api_key` | DeepSeek API Key（留空则用内置规则，免费） |
-| `crypto.api_key` | CryptoCompare API Key（加密货币价格，免费） |
 | `push.pushplus_token` | PushPlus token（微信，HTML 排版，推荐） |
 | `push.wechat_sendkey` | Server酱 SendKey（微信，Markdown） |
 | `push.dingtalk_webhook` | 钉钉机器人 webhook |
@@ -262,7 +241,6 @@ htpasswd -bc /etc/nginx/conf.d/.htpasswd_report 用户名 密码
 | 股票实时行情、历史 K 线 | 东方财富 `push2.eastmoney.com` |
 | 股票行情兜底 | 腾讯行情 `qt.gtimg.cn` |
 | 今日要闻 | 东方财富 7x24 快讯 |
-| 加密货币价格、历史 | CryptoCompare |
 
 均为公开接口，无需登录。净值 / 行情与 App 中看到的一致。
 

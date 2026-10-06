@@ -22,10 +22,3 @@ holdings:
     name: "贵州茅台"
     shares: 100               # 持股数
     cost_price: 1500.00       # 成本价
-
-  # 加密货币示例（OKX 持仓，数据源 CryptoCompare，价格自动换算人民币）
-  - code: "BTC-USDT"
-    type: crypto
-    name: "比特币"            # 可留空 ""，默认显示 BTC
-    shares: 0.05              # 持有数量
-    cost_price: 60000         # 成本价（USDT）

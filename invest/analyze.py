@@ -134,9 +134,6 @@ def analyze(positions, holdings, news=None):
         data = positions.get(h["code"])
         shares = float(h["shares"])
         cost_price = float(h["cost_price"])
-        # 加密货币成本价为 USDT，需按汇率换算成人民币
-        if h.get("type") == "crypto" and data and data.get("fx"):
-            cost_price = cost_price * data["fx"]
         row = {
             "code": h["code"],
             "type": h["type"],
