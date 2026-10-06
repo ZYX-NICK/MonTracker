@@ -86,10 +86,51 @@ def _trade_markers(trades, history):
     return markers
 
 
+def _build_trade_log(holdings, positions):
+    """汇总所有持仓（含已清仓）的买卖记录，按日期倒序，形成交易日志。"""
+    entries = []
+    for h in holdings:
+        code = str(h["code"])
+        name = h.get("name") or code
+        data = positions.get(code)
+        hist = data.get("history", []) if data else []
+        hm = {d: p for d, p in hist}
+        dts = sorted(hm)
+        for t in h.get("trades", []):
+            nav = t.get("nav")
+            shares = t.get("shares")
+            # 旧格式记录里没有净值/份额时，从历史净值推算
+            if (nav is None or shares is None) and hist:
+                nav2 = None
+                for dd in dts:
+                    if dd >= t.get("date", ""):
+                        nav2 = hm[dd]
+                        break
+                if nav2 is None and dts:
+                    nav2 = hm[dts[-1]]
+                if nav is None:
+                    nav = nav2
+                if shares is None and nav and t.get("amount"):
+                    shares = t.get("amount") / nav
+            entries.append({
+                "date": t.get("date", ""),
+                "action": t.get("action", "buy"),
+                "code": code,
+                "name": name,
+                "amount": t.get("amount"),
+                "nav": nav,
+                "shares": shares,
+            })
+    entries.sort(key=lambda e: e["date"], reverse=True)
+    return entries
+
+
 def analyze(positions, holdings, news=None):
     """positions: {code: 抓取结果}，holdings: 配置文件里的持仓清单。"""
+    active = [h for h in holdings if not h.get("closed")
+              and float(h.get("shares", 0) or 0) > 0]
     rows = []
-    for h in holdings:
+    for h in active:
         data = positions.get(h["code"])
         shares = float(h["shares"])
         cost_price = float(h["cost_price"])
@@ -174,6 +215,7 @@ def analyze(positions, holdings, news=None):
         "portfolio_risk": _portfolio_risk(rows),
         "value_series": _portfolio_value_series(rows),
         "news": news or [],
+        "trade_log": _build_trade_log(holdings, positions),
         "n_holdings": len(rows),
         "n_ok": sum(1 for r in rows if r["ok"]),
     }

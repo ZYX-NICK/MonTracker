@@ -61,7 +61,8 @@ def show(holdings):
         print("  （空）")
     for i, h in enumerate(holdings, 1):
         typ = "基金" if h["type"] == "fund" else "股票"
-        print(f"  {i}. {h['name']}（{h['code']}）{typ}  份额 {h['shares']}  成本 {h['cost_price']}")
+        flag = "（已清仓）" if h.get("closed") else ""
+        print(f"  {i}. {h['name']}（{h['code']}）{typ}  份额 {h['shares']}  成本 {h['cost_price']}{flag}")
     print("==============================\n")
 
 
@@ -115,7 +116,8 @@ def add_by_amount(holdings):
         nav, used = d["price"], d["date"]
     shares = amt / nav
     print(f"  → {d['name']}：{amt} 元 ÷ {used} 净值 {nav:.4f} ≈ {shares:,.2f} 份")
-    trade = {"date": date, "action": "buy", "amount": amt}
+    trade = {"date": date, "action": "buy", "amount": amt,
+             "shares": round(shares, 2), "nav": round(nav, 4)}
     for h in holdings:
         if h["type"] == "fund" and str(h["code"]) == code:
             old_shares, old_cost = float(h["shares"]), float(h["cost_price"])
@@ -200,11 +202,13 @@ def sell(holdings):
     sold_shares = min(sold_shares, cur_shares)
     new_shares = cur_shares - sold_shares
     trade = {"date": date, "action": "sell",
-             "amount": round(amount if amount else sold_shares * nav, 2)}
+             "amount": round(amount if amount else sold_shares * nav, 2),
+             "shares": round(sold_shares, 2), "nav": round(nav, 4)}
     h.setdefault("trades", []).append(trade)
     if new_shares < 0.01:
-        holdings.pop(int(idx) - 1)
-        print(f"  ✓ 已记录卖出，「{h['name']}」已全部卖出并移出持仓。\n")
+        h["shares"] = 0.0
+        h["closed"] = True
+        print(f"  ✓ 已记录卖出，「{h['name']}」已全部卖出（标记清仓，交易记录保留）。\n")
     else:
         h["shares"] = round(new_shares, 2)
         print(f"  ✓ 已记录卖出 {sold_shares:,.2f} 份，剩余 {new_shares:,.2f} 份（已标记卖出点）。\n")

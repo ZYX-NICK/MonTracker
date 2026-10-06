@@ -44,6 +44,8 @@ def main():
     print("⏳ 正在抓取行情与净值 ...")
     positions = {}
     for h in cfg["holdings"]:
+        if h.get("closed"):
+            continue
         code = str(h["code"]).strip()
         type_ = h.get("type", "fund").strip().lower()
         market = str(h.get("market", "")).strip()

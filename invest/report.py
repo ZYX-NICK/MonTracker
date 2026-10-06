@@ -150,6 +150,29 @@ def _news_html(s):
     return f'<ul class="news">{lis}</ul>'
 
 
+def _trade_log_html(s):
+    entries = s.get("trade_log") or []
+    if not entries:
+        return '<p class="warn">暂无交易记录。</p>'
+    head = ('<tr><th>日期</th><th>操作</th><th>基金/股票</th>'
+            '<th>金额</th><th>净值/价</th><th>份额/股数</th></tr>')
+    rows = []
+    for e in entries:
+        act = "买入" if e["action"] == "buy" else "卖出"
+        cls = "up" if e["action"] == "buy" else "down"
+        nav_s = "—" if e.get("nav") is None else f"{e['nav']:.4f}"
+        sh_s = "—" if e.get("shares") is None else f"{e['shares']:,.2f}"
+        rows.append(
+            f'<tr><td>{html.escape(e["date"])}</td>'
+            f'<td class="{cls}">{act}</td>'
+            f'<td class="name">{html.escape(e["name"])}<span class="code">({e["code"]})</span></td>'
+            f'<td>{_money(e["amount"])}</td>'
+            f'<td>{nav_s}</td>'
+            f'<td>{sh_s}</td></tr>'
+        )
+    return '<table>' + head + "".join(rows) + '</table>'
+
+
 def _pie_data(s):
     data = [{"name": h["name"], "value": round(h["weight"], 2)}
             for h in sorted(s["holdings"], key=lambda x: -x["weight"]) if h["ok"]]
@@ -242,6 +265,7 @@ def render(summary, ai_text):
     page = page.replace("__CONSTITUENTS__", _constituents_html(summary))
     page = page.replace("__NEWS__", _news_html(summary))
     page = page.replace("__RISK__", _risk_table(summary))
+    page = page.replace("__TRADE_LOG__", _trade_log_html(summary))
     page = page.replace("__AI__", html.escape(ai_text or "（暂无研判）"))
     page = page.replace("__ECHARTS__", echarts_tag)
     page = page.replace("__PIE__", _js(_pie_data(summary)))
@@ -354,6 +378,8 @@ footer { color:var(--muted); font-size:12px; text-align:center; margin-top:24px;
   <div class="card"><h2>今日要闻</h2>__NEWS__</div>
 
   <div class="card"><h2>风险指标（近一年）</h2><table>__RISK__</table></div>
+
+  <div class="card"><h2>交易日志</h2>__TRADE_LOG__</div>
 
   <div class="card"><h2>🤖 AI 研判</h2><div class="ai-text">__AI__</div></div>
 
